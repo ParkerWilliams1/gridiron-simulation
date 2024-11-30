@@ -1,0 +1,85 @@
+
+#home {
+  position: absolute;
+  top: 5%;
+  left: 4%;
+  margin: 0;
+  padding: 0;
+  font-size: 20px;
+}
+
+#navbar-wrapper {
+  position: absolute; 
+  top: 5%;
+  right: 5%;          
+  display: flex;      
+  align-items: center; 
+}
+
+.navbar-buttons {
+  display: flex;
+  flex-direction: row;  
+  gap: 40px;            
+  list-style: none;     
+  margin: 0;
+  padding-top: 0;
+  padding-bottom: 0;
+  font-size: 20px;
+}
+
+.navbar-buttons a {
+  color: inherit;
+  text-decoration: none;
+}
+
+
+#navbar-wrapper li a::after {
+  opacity: 1;
+  transform: scale(0);
+  transform-origin: center;
+}
+
+#navbar-wrapper li a:hover::after,
+#navbar-wrapper li a:focus::after{
+  transform: scale(1);
+}
+
+#navbar-wrapper ul {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+#navbar-wrapper a {
+  display: block;
+  position: relative;
+}
+
+#navbar-wrapper a::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 0.1em;
+  background-color: #1f1f1f;
+  opacity: 0;
+  transition: opacity 500ms, transform 400ms;
+}
+
+#navbar-wrapper a:hover::after,
+#navbar-wrapper a:focus::after {
+  opacity: 1;
+  transform: translate3d(0, 0.2em, 0);
+}
+
+.navbar-buttons li a {
+  text-decoration: none;
+  transition: opacity 500ms, transform 400ms;
+}
+
+.navbar-buttons li a.active {
+  text-decoration: underline; 
+  margin: 0;
+  text-decoration-color: #1f1f1f; 
+}

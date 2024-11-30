@@ -1,0 +1,14 @@
+@font-face {
+  font-family: 'Roboto Mono';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('../../public/roboto-mono-v23-latin-regular.woff2') format('woff2');
+}
+
+body {
+  font-family: 'Roboto Mono';
+  background-color: #fff;
+  color: black;
+}
+
