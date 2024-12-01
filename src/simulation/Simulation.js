@@ -1,25 +1,15 @@
-import { Team, saints, giants, indies, knights,heat, devils, red_sharks, tornadoes, cavs, rebels, natives, soul,islanders, grizzlies, dynamite, aggies, gladiators, arrows, spartins, flames,mustangs, falcons, coasters, mountaineers, squids, braves, gold, colonials,stars, ducks, quakes, slisers, league } from './Teams.js';
+import { league } from './Teams.js';
 import React from 'react';
 
 export const allGames = [];
-export const maxGamesPerTeam = 15;
+export const maxGamesPerTeam = 31;
 export const gamesPlayed = new Map();
 
 
-export function simulateSingleWeek(schedule, week, records) {
-  let games = schedule[week];
-  // Initialize records for all teams
-  for (let i = 0; i < games.length; i++) {
-    const homeTeam = games[i][0];
-    const awayTeam = games[i][1];
+export function simulateSingleWeek(schedule, week) {
+  if (week == -1) return;
 
-    if (!records.has(homeTeam)) {
-      records.set(homeTeam, { wins: 0, losses: 0 });
-    }
-    if (!records.has(awayTeam)) {
-      records.set(awayTeam, { wins: 0, losses: 0 });
-    }
-  }
+  let games = schedule[week];
 
   // Simulate each game
   for (let i = 0; i < games.length; i++) {
@@ -31,14 +21,15 @@ export function simulateSingleWeek(schedule, week, records) {
     // console.log(`${winner.teamName} has beaten ${loser.teamName} ${winner === homeTeam ? "at home" : "on the road"}`);
 
     // Update records
-    const winnerRecord = records.get(winner);
-    const loserRecord = records.get(loser);
+    const winnerRecord = winner.record;
+    const loserRecord = loser.record;
 
     winnerRecord.wins++;
     loserRecord.losses++;
+  
+    winner.record = winnerRecord;
+    loser.record = loserRecord;
   }
-
-  return records;
 }
 
 export function getRandomWinner(team1, team2) {
@@ -55,8 +46,8 @@ export function createDivisionalGames(division) {
   for (let i = 0; i < division.length; i++) {
     for (let j = i + 1; j < division.length; j++) {
       // Each pair of teams plays twice (home-and-away)
-      divisionGames.push([division[i], division[j]]); // Game 1: Team i vs Team j
-      divisionGames.push([division[j], division[i]]); // Game 2: Team j vs Team i
+      divisionGames.push([division[i], division[j]]);
+      divisionGames.push([division[j], division[i]]);
     }
   }
 
@@ -120,6 +111,7 @@ export function initializeSeason() {
       }
     }
   }
+
   return allGames;
 }
 
@@ -135,7 +127,7 @@ export function balanceSeason(allGames) {
 
   let season = [];
  
-  for (let i = 0; i < 15; i++) {
+  for (let i = 0; i < maxGamesPerTeam; i++) {
     const weeklyGames = [];
     const weeklyMap = new Map(); 
     let itr = 0;
@@ -166,44 +158,7 @@ export function balanceSeason(allGames) {
   return season;
 }
 
-
-export function simulateGames(games) {
-  const records = new Map(); 
-
-  // Initialize records for all teams
-  for (let i = 0; i < games.length; i++) {
-    const homeTeam = games[i][0];
-    const awayTeam = games[i][1];
-
-    if (!records.has(homeTeam)) {
-      records.set(homeTeam, { wins: 0, losses: 0 });
-    }
-    if (!records.has(awayTeam)) {
-      records.set(awayTeam, { wins: 0, losses: 0 });
-    }
-  }
-
-  // Simulate each game
-  for (let i = 0; i < games.length; i++) {
-    const homeTeam = games[i][0];
-    const awayTeam = games[i][1];
-    const winner = getRandomWinner(homeTeam, awayTeam);
-    const loser = winner === homeTeam ? awayTeam : homeTeam;
-
-   //  console.log(`${winner.teamName} has beaten ${loser.teamName} ${winner === homeTeam ? "at home" : "on the road"}`);
-
-    // Update records
-    const winnerRecord = records.get(winner);
-    const loserRecord = records.get(loser);
-
-    winnerRecord.wins++;
-    loserRecord.losses++;
-  }
-
-  return records;
-}
-
-export function determinePlayoffBracket(league, recap) {
+export function determinePlayoffBracket(league) {
   const playoffBracket = { Beast: [], Strong: [] };
 
   // Loop through each conference in the league
@@ -216,32 +171,19 @@ export function determinePlayoffBracket(league, recap) {
     for (const division in conference) {
       const divisionTeams = conference[division];
 
-      // Get the team records from the recap map
-      const divisionRecords = new Map();
-      divisionTeams.forEach(team => {
-        const teamRecord = recap.get(team);
-        if (teamRecord) {
-          divisionRecords.set(team, teamRecord);
-        }
-      });
-
-      // Ensure divisionRecords is not empty before reducing
-      if (divisionRecords.size > 0) {
-        // Find the division winner based on the most wins
-        const divisionWinner = [...divisionRecords.entries()].reduce((bestTeam, currentTeam) => {
-          return currentTeam[1].wins > bestTeam[1].wins ? currentTeam : bestTeam;
+      // Find the division winner
+      if (divisionTeams.length > 0) {
+        const divisionWinner = divisionTeams.reduce((bestTeam, currentTeam) => {
+          return currentTeam.record.wins > bestTeam.record.wins ? currentTeam : bestTeam;
         });
 
-        // Add the division winner to the divisionWinners list
-        divisionWinners.push({
-          teamObject: divisionWinner[0], // Store the actual team object
-          record: divisionWinner[1],
-        });
+        // Add the division winner to the list
+        divisionWinners.push(divisionWinner);
 
-        // Add the remaining teams for wildcard consideration
-        divisionRecords.forEach((record, teamObject) => {
-          if (teamObject !== divisionWinner[0]) {
-            remainingTeams.push({ teamObject, record });
+        // Add the remaining teams to the wildcard pool
+        divisionTeams.forEach(team => {
+          if (team !== divisionWinner) {
+            remainingTeams.push(team);
           }
         });
       }
@@ -261,45 +203,6 @@ export function determinePlayoffBracket(league, recap) {
   return playoffBracket;
 }
 
-export function printDivisionStandings(league, records) {
-  let standingsJSX = [];
-
-  // Loop through each conference in the league
-  for (const conferenceName in league) {
-    standingsJSX.push(<h3 key={`conference-${conferenceName}`}>Division Standings for Conference: {conferenceName}</h3>);
-
-    // Loop through each division in the conference
-    for (const divisionName in league[conferenceName]) {
-      const division = league[conferenceName][divisionName];
-      const divisionRecords = division.map(team => {
-        return {
-          teamName: team.teamName,
-          record: records.get(team),
-        };
-      });
-
-      // Sort the teams by wins (descending)
-      divisionRecords.sort((a, b) => b.record.wins - a.record.wins);
-
-      // Create a section for the division standings
-      standingsJSX.push(
-        <h4 key={`division-${conferenceName}-${divisionName}`}>Division: {divisionName}</h4>
-      );
-
-      divisionRecords.forEach(({ teamName, record }) => {
-        standingsJSX.push(
-          <p key={`team-${conferenceName}-${divisionName}-${teamName}`}>
-            {teamName}: {record.wins}-{record.losses}
-          </p>
-        );
-      });
-    }
-  }
-
-  return <div>{standingsJSX}</div>;
-}
-
-// In simFunctions.js
 export function printPlayoffRankings(playoffs) {
   let playoffRankingsJSX = [];
 
@@ -316,7 +219,7 @@ export function printPlayoffRankings(playoffs) {
     teams.forEach((team, index) => {
       playoffRankingsJSX.push(
         <p key={`team-${conferenceName}-${index}`}>
-          Rank {index + 1}: {team.teamObject._teamLocation} {team.teamObject._teamName} - {team.record.wins}-{team.record.losses}
+          Rank {index + 1}: {team.teamLocation} {team.teamName} - {team.record.wins}-{team.record.losses}
         </p>
       );
     });
@@ -325,11 +228,55 @@ export function printPlayoffRankings(playoffs) {
   return <div>{playoffRankingsJSX}</div>; // Return the JSX structure
 }
 
+export function printDivisionStandings(league) {
+  let standingsJSX = [];
+
+  // Loop through each conference in the league
+  for (const conferenceName in league) {
+    let conferenceContent = [];
+
+    conferenceContent.push(
+      <h3 key={`conference-${conferenceName}`}>Division Standings for Conference: {conferenceName}</h3>
+    );
+
+    // Loop through each division in the conference
+    for (const divisionName in league[conferenceName]) {
+      const division = league[conferenceName][divisionName];
+
+      // Ensure division is an array (if it's an object, convert it)
+      const teamsArray = Array.isArray(division) ? division : Object.values(division);
+      // Sort the teams in the division by wins (descending)
+      const sortedTeams = teamsArray.sort((a, b) => b.record.wins - a.record.wins);
+
+      // Create a section for the division standings
+      conferenceContent.push(
+        <h4 key={`division-${conferenceName}-${divisionName}`}>Division: {divisionName}</h4>
+      );
+
+      // Loop through sorted teams and display standings
+      sortedTeams.forEach(team => {
+        conferenceContent.push(
+          <p key={`team-${conferenceName}-${divisionName}-${team.teamName}`}>
+            {team.teamName}: {team.record.wins}-{team.record.losses}
+          </p>
+        );
+      });
+    }
+
+    standingsJSX.push(
+      <div className="conference-wrapper" key={`conference-wrapper-${conferenceName}`}>
+        {conferenceContent}
+      </div>
+    );
+  }
+
+  return <div className="results-wrapper">{standingsJSX}</div>;
+}
 
 export function getRandomWinnerWithScore(team1, team2) {
   const totalRating = team1.teamRating + team2.teamRating;
-  const team1WinProbability = team1.teamRating / totalRating; // Normalize ratings to probabilities
-  const randomValue = Math.random(); // Generate a random number between 0 and 1
+  const team1WinProbability = team1.teamRating / totalRating;
+  const randomValue = Math.random();
 
   // Determine winner
   const winner = randomValue < team1WinProbability ? team1 : team2;
@@ -372,47 +319,46 @@ export function simulateScore(teamRating, opponentScore = null, ensureWin = fals
   return possibleScores.reduce((prev, curr) => (Math.abs(curr - totalScore) < Math.abs(prev - totalScore) ? curr : prev));
 }
 
-
 export function simulatePlayoffMatches(playoffs) {
   // Helper function to simulate a conference playoff with scores
   function simulateConferencePlayoff(conferenceName, conferenceTeams) {
     console.log(`\n=== ${conferenceName} Conference Playoffs ===\n`);
 
     // First Round
-    console.log(`#3 ${conferenceTeams[2].teamObject._teamName} vs. #6 ${conferenceTeams[5].teamObject._teamName}`);
+    console.log(`#3 ${conferenceTeams[2]._teamName} vs. #6 ${conferenceTeams[5]._teamName}`);
     const lowerSeedMatch = getRandomWinnerWithScore(
-      conferenceTeams[2].teamObject,
-      conferenceTeams[5].teamObject
+      conferenceTeams[2],
+      conferenceTeams[5]
     );
-    const lowerSeed = lowerSeedMatch.winner === conferenceTeams[2].teamObject ? 3 : 6;
+    const lowerSeed = lowerSeedMatch.winner === conferenceTeams[2] ? 3 : 6;
     console.log(`Winner: #${lowerSeed} ${lowerSeedMatch.winner._teamName}`);
     console.log(`Final Score:`, lowerSeedMatch.finalScore, "\n");
 
-    console.log(`#4 ${conferenceTeams[3].teamObject._teamName} vs. #5 ${conferenceTeams[4].teamObject._teamName}`);
+    console.log(`#4 ${conferenceTeams[3]._teamName} vs. #5 ${conferenceTeams[4]._teamName}`);
     const higherSeedMatch = getRandomWinnerWithScore(
-      conferenceTeams[3].teamObject,
-      conferenceTeams[4].teamObject
+      conferenceTeams[3],
+      conferenceTeams[4]
     );
-    const higherSeed = higherSeedMatch.winner === conferenceTeams[3].teamObject ? 4 : 5;
+    const higherSeed = higherSeedMatch.winner === conferenceTeams[3] ? 4 : 5;
     console.log(`Winner: #${higherSeed} ${higherSeedMatch.winner._teamName}`);
     console.log(`Final Score:`, higherSeedMatch.finalScore, "\n");
 
     // Second Round (Top seeds vs. First Round winners)
-    console.log(`#1 ${conferenceTeams[0].teamObject._teamName} vs. #${higherSeed} ${higherSeedMatch.winner._teamName}`);
+    console.log(`#1 ${conferenceTeams[0]._teamName} vs. #${higherSeed} ${higherSeedMatch.winner._teamName}`);
     const firstSeedMatch = getRandomWinnerWithScore(
-      conferenceTeams[0].teamObject,
+      conferenceTeams[0],
       higherSeedMatch.winner
     );
-    const firstSeedFinalSeed = firstSeedMatch.winner === conferenceTeams[0].teamObject ? 1 : higherSeed;
+    const firstSeedFinalSeed = firstSeedMatch.winner === conferenceTeams[0] ? 1 : higherSeed;
     console.log(`Winner: #${firstSeedFinalSeed} ${firstSeedMatch.winner._teamName}`);
     console.log(`Final Score:`, firstSeedMatch.finalScore, "\n");
 
-    console.log(`#2 ${conferenceTeams[1].teamObject._teamName} vs. #${lowerSeed} ${lowerSeedMatch.winner._teamName}`);
+    console.log(`#2 ${conferenceTeams[1]._teamName} vs. #${lowerSeed} ${lowerSeedMatch.winner._teamName}`);
     const secondSeedMatch = getRandomWinnerWithScore(
-      conferenceTeams[1].teamObject,
+      conferenceTeams[1],
       lowerSeedMatch.winner
     );
-    const secondSeedFinalSeed = secondSeedMatch.winner === conferenceTeams[1].teamObject ? 2 : lowerSeed;
+    const secondSeedFinalSeed = secondSeedMatch.winner === conferenceTeams[1] ? 2 : lowerSeed;
     console.log(`Winner: #${secondSeedFinalSeed} ${secondSeedMatch.winner._teamName}`);
     console.log(`Final Score:`, secondSeedMatch.finalScore, "\n");
 
@@ -445,21 +391,5 @@ export function simulatePlayoffMatches(playoffs) {
   const leagueFinalMatch = getRandomWinnerWithScore(beastChampion.team, strongChampion.team);
   console.log(`Winner: ${leagueFinalMatch.winner._teamName}`);
   console.log(`Final Score:`, leagueFinalMatch.finalScore, "\n");
-}
-
-export function main() {
-  initializeSeason();
-  let seasonRecap = simulateGames(allGames);
-  printDivisionStandings(league, seasonRecap);
-  let playoffs = determinePlayoffBracket(league, seasonRecap);
-  printPlayoffRankings(playoffs, "\n");
-  simulatePlayoffMatches(playoffs);
-}
-
-export function runSzn(seasonRecap) {
-  printDivisionStandings(league, seasonRecap);
-  let playoffs = determinePlayoffBracket(league, seasonRecap);
-  printPlayoffRankings(playoffs, "\n");
-  simulatePlayoffMatches(playoffs);
 }
 

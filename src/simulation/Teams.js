@@ -1,12 +1,13 @@
 
 export default class Team {
-  constructor(teamId, teamLocation, teamName, primaryColor, secondaryColor, teamRating) {
+  constructor(teamId, teamLocation, teamName, primaryColor, secondaryColor, teamRating, record) {
     this._teamId = teamId; 
     this._teamLocation = teamLocation;
     this._teamName = teamName;
     this._primaryColor = primaryColor;
     this._secondaryColor = secondaryColor;
     this._teamRating = teamRating;
+    this._record = { wins: 0, losses: 0 };
   }
 
   // team getter functions
@@ -16,17 +17,21 @@ export default class Team {
   get primaryColor() { return this._primaryColor; }
   get secondaryColor() { return this._secondaryColor; }
   get teamRating() { return this._teamRating; }
+  get record() { return this._record; }
+
+  // team setter functions
+  set record(value) { this._record = value }
 }
 
 // Beast: North Division:
-export const saints = new Team(1, "St. Louis", "Saints", "primaryColor", "secondaryColor", 75);
-export const giants = new Team(2, "Detroit", "Giants", "primaryColor", "secondaryColor", 80);
-export const indies = new Team(3, "Indianapolis", "Indies", "primaryColor", "secondaryColor", 55);
-export const knights = new Team(4, "Pittsburgh", "Knights", "primaryColor", "secondaryColor", 92);
+export const saints = new Team(1, "St. Louis", "Saints", "#0b0757", "#857310", 75);
+export const giants = new Team(2, "Detroit", "Giants", "#1630a1", "#9fa9d4", 80);
+export const indies = new Team(3, "Indianapolis", "Indies", "#1f1f1f", "secondaryColor", 55);
+export const knights = new Team(4, "Pittsburgh", "Knights", "#1f1f1f", "secondaryColor", 92);
 
 // Beast: South Division:
-export const heat = new Team(5, "Arizona", "Heat", "primaryColor", "secondaryColor", 45);
-export const devils = new Team(6, "Tampa Bay", "Sun Devils", "primaryColor", "secondaryColor", 60);
+export const heat = new Team(5, "Arizona", "Heat", "#1f1f1f", "secondaryColor", 45);
+export const devils = new Team(6, "Tampa Bay", "Sun Devils", "#1f1f1f", "secondaryColor", 60);
 export const red_sharks = new Team(7, "Miami", "Red Sharks", "#e0260d", "#ffffff", 84);
 export const tornadoes = new Team(8, "Tennessee", "Tornadoes", "#c9800a", "#949494", 88);
 
@@ -52,20 +57,29 @@ export const flames = new Team(20, "Chicago", "Flames", "#e81700", "#ffee00", 66
 // Strong: South Division:
 export const mustangs = new Team(21, "Texas", "Mustangs", "#180599", "#450301", 94);
 export const falcons = new Team(22, "Florida", "Falcons", "#0c8c00", "#f8fff7", 83);
-export const coasters = new Team(23, "Orlando", "Coasters", "primaryColor", "secondaryColor", 76);
+export const coasters = new Team(23, "Orlando", "Coasters", "#066347", "#050505", 76);
 export const mountaineers = new Team(24, "Colorado", "Mountaineers", "primaryColor", "secondaryColor", 69);
 
 // Strong: East Division:
-export const squids = new Team(25, "New Jersey", "Squids", "primaryColor", "secondaryColor", 80);
+export const squids = new Team(25, "New Jersey", "Squids", "#8f1010", "#030303", 80);
 export const braves = new Team(26, "Brooklyn", "Braves", "primaryColor", "secondaryColor", 72);
-export const gold = new Team(27, "New York", "Gold", "primaryColor", "secondaryColor", 82);
-export const colonials = new Team(28, "Charlotte", "Colonials", "primaryColor", "secondaryColor", 83);
+export const gold = new Team(27, "New York", "Gold", "#b89a07", "#27308a", 82);
+export const colonials = new Team(28, "Charlotte", "Colonials", "#0013bf", "#bf0d00", 83);
 
 // Strong: West Division:
-export const stars = new Team(29, "Los Angeles", "Stars", "primaryColor", "secondaryColor", 60);
-export const ducks = new Team(30, "San Diego", "Ducks", "#e87909", "#085c8c", 90);
+export const stars = new Team(29, "Los Angeles", "Stars", "#00d9ff", "121212", 60);
+export const ducks = new Team(30, "San Diego", "Ducks", "#e87909", "#085c8c", 100);
 export const quakes = new Team(31, "San Francisco", "Quakes", "#1a1b47", "#bfbf62", 50);
 export const slisers = new Team(32, "San Jose", "Slisers", "#483fa1", "#49069c", 60);
+
+export const teams_list = [saints, giants, indies, knights, 
+  heat, devils, red_sharks, tornadoes, 
+  cavs, rebels, natives, soul, 
+  islanders, grizzlies, dynamite, aggies, 
+  gladiators, arrows, spartins, flames, 
+  mustangs, falcons, coasters, mountaineers, 
+  squids, braves, gold, colonials, 
+  stars, ducks, quakes, slisers];
 
 export const league = {
   Beast: {
