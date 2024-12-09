@@ -1,23 +1,48 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import '../styles/navbar.css';
 
-function Navbar() {
+const Navbar = () => {
+  const [activeButton, setActiveButton] = useState('/');
+
+  const handleClick = (path) => {
+    setActiveButton(path);
+  };
+
   return (
     <div>
     <p id="home">Gridiron Simulation</p>
-      <div id="navbar-wrapper">
-        <ul className="navbar-buttons">
-          <li>
-             <a>Home</a>
-          </li>
-          <li>
-              <a>Teams</a>
-          </li>
-          <li>
-              <a>Simulate</a>
-          </li>
-        </ul>
-      </div>
+    <div id="navbar-wrapper">
+      <ul className="navbar-buttons">
+        <li>
+          <Link
+            to="/Home"
+            className={activeButton === '/' ? 'active' : ''}
+            onClick={() => handleClick('/')}
+          >
+            Home
+          </Link>
+        </li>
+        <li>
+          <Link
+            to="/Teams"
+            className={activeButton === '/projects' ? 'active' : ''}
+            onClick={() => handleClick('/projects')}
+          >
+            Teams
+          </Link>
+        </li>
+        <li>
+          <Link
+            to="/Simulation"
+            className={activeButton === '/work' ? 'active' : ''}
+            onClick={() => handleClick('/work')}
+         >
+            Simulation
+          </Link>
+        </li>
+      </ul>
+    </div>
     </div>
   );
 };

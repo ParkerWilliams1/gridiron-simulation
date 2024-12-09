@@ -1,5 +1,4 @@
 import * as TeamData from '../simulation/Teams';
-import '../styles/home.css';
 
 function Home() {
   let teams = getAllTeamsNames();

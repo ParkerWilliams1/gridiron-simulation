@@ -3,6 +3,8 @@ import '../styles/simulate.css';
 import DivisionGraphs from './DivisionGraphs';
 import * as simFunctions from '../simulation/Simulation';
 import * as Teams from '../simulation/Teams';
+import { Bracket } from 'react-brackets';
+import BracketComponent from './playoffBracket';
 
 function Simulate() {
   const [allGames, setAllGames] = useState([]);
@@ -11,6 +13,7 @@ function Simulate() {
   const [standings, setStandings] = useState(null);
   const [playoffRankings, setPlayoffRankings] = useState(null);
   const [recordsHistory, setRecordsHistory] = useState([]);
+  const [playoffTeams, setPlayoffTeams] = useState([]);
 
   function returnSeason() {
     const tempGames = simFunctions.initializeSeason();
@@ -21,15 +24,33 @@ function Simulate() {
     setAllGames(balancedSeason);
   }
 
+  function resetSeason() {
+    setStandings(null);
+    setAllGames([]);
+    setPlayoffRankings([]);
+    setWeek(-1);
+    setRecordsHistory([]);
+  }
+
   function simWeek() {
-    if (week > 30) {
-      let playoff = simFunctions.determinePlayoffBracket(Teams.league);
-      let playoffJSX = simFunctions.simulatePlayoffMatches(playoff);
+    if (week > 14) {
+      let playoffTeamsList = simFunctions.determinePlayoffBracket(Teams.league);
+      playoffTeamsList = (playoffTeamsList.Beast);
+      setPlayoffTeams(playoffTeamsList);  // Set the formatted rounds for the Bracket
       return;
+
+      /* let playoff = simFunctions.determinePlayoffBracket(Teams.league);
+      let playoffJSX = simFunctions.simPlayoffMatches(playoff);
+      setPlayoffRankings(playoffJSX);
+      return;*/
     }
 
+    //const probabilities = simFunctions.calculatePlayoffProbabilities(allGames, week, Teams.league);
+    //console.log("Playoff Probabilities:", probabilities);
+    
     simFunctions.simulateSingleWeek(allGames, week);
     setTeams([...teams]);
+
     // Clone teams to capture current state for records history
     const teamsClone = JSON.parse(JSON.stringify(teams));
     setRecordsHistory(prevHistory => [...prevHistory, teamsClone]);
@@ -64,15 +85,24 @@ function Simulate() {
         <button onClick={returnSeason}>Setup Season</button>
         <button onClick={simWeek}>Simulate Week</button>
         <button onClick={logAllRecords}>Log Records</button>
+        <button onClick={resetSeason}>Reset Season</button>
       </div>
-      <div className="results-wrapper">
+      <div className="standings-wrapper">
         <div className="standings-results">
-          {standings || <p>No standings available. Simulate to view results.</p>}
+          { standings || <p>No standings available. Simulate to view results.</p>}
         </div>
         <div className="playoff-results">
-          {playoffRankings || <p>No playoff rankings available. Simulate the season to view playoff results.</p>}
+          <h1 id="playoff-picture-title">Playoff Picture</h1>
+          {playoffRankings}
+
+          {/* Pass the playoff teams to the Bracket component when week > 14 */}
         </div>
-        { <DivisionGraphs recordsHistory={recordsHistory} /> }
+
+        {week > 14 && playoffTeams && playoffTeams.length > 0 && (
+          <BracketComponent teams={playoffTeams} />
+        )}
+
+        {/* <DivisionGraphs recordsHistory={recordsHistory} /> */}
       </div>
     </div>
   );

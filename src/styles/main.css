@@ -6,9 +6,20 @@
   src: url('../../public/roboto-mono-v23-latin-regular.woff2') format('woff2');
 }
 
-body {
-  font-family: 'Roboto Mono';
-  background-color: #fff;
-  color: black;
+@font-face {
+  font-family: 'SF Pro';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('../../public/SF-Pro-Display-BoldItalic.otf');
 }
 
+body {
+  background-color: #ebe8e8;
+  font-family: 'Roboto Mono';
+  color: #333333;
+}
+
+/*
+  background-color: #ebe8e8;
+*/

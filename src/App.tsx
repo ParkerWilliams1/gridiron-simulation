@@ -1,16 +1,20 @@
 import React, { useState } from 'react';
+import { BrowserRouter, Routes, Route, Link } from 'react-router-dom';
 import Simulate from './components/Simulate';
-import Home from './components/Home';
+import Teams from './components/Teams';
 import Navbar from './components/Navbar';
+import BracketComponent from './components/playoffBracket';
 import './styles/main.css';
 
 function App() {
   return (
-    <div>
+    <BrowserRouter>
       <Navbar />
-      <Simulate />
-      {/* <Home /> */}
-    </div>
+      <Routes>
+        <Route path="/Teams" element={ <Teams /> } />
+        <Route path="/Simulation" element={ <Simulate /> } />
+      </Routes>
+    </BrowserRouter>
   );
 }
 

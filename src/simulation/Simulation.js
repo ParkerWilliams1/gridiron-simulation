@@ -2,9 +2,8 @@ import { league } from './Teams.js';
 import React from 'react';
 
 export const allGames = [];
-export const maxGamesPerTeam = 31;
+export const maxGamesPerTeam = 15;
 export const gamesPlayed = new Map();
-
 
 export function simulateSingleWeek(schedule, week) {
   if (week == -1) return;
@@ -34,8 +33,8 @@ export function simulateSingleWeek(schedule, week) {
 
 export function getRandomWinner(team1, team2) {
   const totalRating = team1.teamRating + team2.teamRating;
-  const team1WinProbability = team1.teamRating / totalRating; // Normalize ratings to probabilities
-  const randomValue = Math.random(); // Generate a random number between 0 and 1
+  const team1WinProbability = team1.teamRating / totalRating;
+  const randomValue = Math.random();
 
   return randomValue < team1WinProbability ? team1 : team2;
 }
@@ -77,6 +76,7 @@ export function initializeSeason() {
       });
     });
   });
+
   // Adding all divisional games
   for (const leagueName in league) {
     for (const divisionName in league[leagueName]) {
@@ -149,13 +149,10 @@ export function balanceSeason(allGames) {
       }
     }
 
-    // Append weekly games to the season schedule
     season.push(weeklyGames);
   }
 
-  season = shuffleArray(season);
-
-  return season;
+  return shuffleArray(season);
 }
 
 export function determinePlayoffBracket(league) {
@@ -177,7 +174,6 @@ export function determinePlayoffBracket(league) {
           return currentTeam.record.wins > bestTeam.record.wins ? currentTeam : bestTeam;
         });
 
-        // Add the division winner to the list
         divisionWinners.push(divisionWinner);
 
         // Add the remaining teams to the wildcard pool
@@ -203,13 +199,25 @@ export function determinePlayoffBracket(league) {
   return playoffBracket;
 }
 
+function findTeamDivision(teamName, conferenceName) {
+  const divisions = league[conferenceName.conferenceName];
+  
+  for (const [divisionName, teams] of Object.entries(divisions)) {
+    if (teams.includes(teamName)) {
+      return divisionName;
+    }
+  }
+  return null;  
+}
+
 export function printPlayoffRankings(playoffs) {
   let playoffRankingsJSX = [];
 
   // Loop through each conference in the playoffs
   for (const conferenceName in playoffs) {
-    playoffRankingsJSX.push(
-      <h3 key={`conference-${conferenceName}`}>Playoff Rankings for Conference: {conferenceName}</h3>
+    let conferencejsx = [];
+    conferencejsx.push(
+      <h3 className="playoff-conference-name" key={`conference-${conferenceName}`}>{conferenceName}</h3>
     );
 
     // Get the teams in the playoff bracket for the conference
@@ -217,15 +225,27 @@ export function printPlayoffRankings(playoffs) {
 
     // Add the rankings for each team in the conference
     teams.forEach((team, index) => {
-      playoffRankingsJSX.push(
-        <p key={`team-${conferenceName}-${index}`}>
-          Rank {index + 1}: {team.teamLocation} {team.teamName} - {team.record.wins}-{team.record.losses}
-        </p>
+     let teamDivision = findTeamDivision(team, {conferenceName});
+
+      conferencejsx.push(
+        <div className="playoff-team-element" 
+        style={{
+          backgroundColor: team.primaryColor
+          }}>
+          <p className="playoff-team-rank">{index + 1}</p>
+          <p className="playoff-team-name" key={`team-${conferenceName}-${index}`}>{team.teamLocation} {team.teamName}</p>
+          <div className="playoff-team-record-info">
+            <p className="playoff-team-record">{team.record.wins}-{team.record.losses}</p>
+            <p className="playoff-team-division">{conferenceName} {teamDivision}</p>
+          </div>
+        </div>
       );
     });
+
+    playoffRankingsJSX.push(<div className="playoff-conference-wrapper">{conferencejsx}</div>);
   }
 
-  return <div>{playoffRankingsJSX}</div>; // Return the JSX structure
+  return <div className="playoff-wrap">{playoffRankingsJSX}</div>;
 }
 
 export function printDivisionStandings(league) {
@@ -253,25 +273,31 @@ export function printDivisionStandings(league) {
         <h4 key={`division-${conferenceName}-${divisionName}`}>Division: {divisionName}</h4>
       );
 
-      // Loop through sorted teams and display standings
       sortedTeams.forEach(team => {
         conferenceContent.push(
-          <p key={`team-${conferenceName}-${divisionName}-${team.teamName}`}>
-            {team.teamName}: {team.record.wins}-{team.record.losses}
-          </p>
+          <div className="division-team-element" 
+          style={{
+            backgroundColor: team.primaryColor
+            }}>
+            <p className="division-team-name">{team.teamLocation} {team.teamName}</p>
+            <p className="division-team-record">{team.record.wins}-{team.record.losses}</p>
+          </div>
         );
       });
-    }
+   }
+
 
     standingsJSX.push(
-      <div className="conference-wrapper" key={`conference-wrapper-${conferenceName}`}>
+      <div className="conference-standings-wrapper" key={`conference-wrapper-${conferenceName}`}>
         {conferenceContent}
       </div>
     );
   }
 
-  return <div className="results-wrapper">{standingsJSX}</div>;
+  return <div className="division-wrapper">{standingsJSX}</div>;
 }
+
+
 
 export function getRandomWinnerWithScore(team1, team2) {
   const totalRating = team1.teamRating + team2.teamRating;
@@ -291,13 +317,12 @@ export function getRandomWinnerWithScore(team1, team2) {
     winner,
     loser,
     finalScore: {
-      [winner._teamName]: winnerScore,
-      [loser._teamName]: loserScore,
+      winner: winnerScore,
+      loser: loserScore,
     },
   };
 }
 
-// Simulate Score of Game
 export function simulateScore(teamRating, opponentScore = null, ensureWin = false) {
   const baseScore = Math.round((teamRating / 100) * 20);
   const variability = Math.floor(Math.random() * 20);
@@ -319,77 +344,108 @@ export function simulateScore(teamRating, opponentScore = null, ensureWin = fals
   return possibleScores.reduce((prev, curr) => (Math.abs(curr - totalScore) < Math.abs(prev - totalScore) ? curr : prev));
 }
 
-export function simulatePlayoffMatches(playoffs) {
-  // Helper function to simulate a conference playoff with scores
-  function simulateConferencePlayoff(conferenceName, conferenceTeams) {
-    console.log(`\n=== ${conferenceName} Conference Playoffs ===\n`);
+export function simPlayoffMatches(playoffs) {
+  let returnjsx = [];
 
-    // First Round
-    console.log(`#3 ${conferenceTeams[2]._teamName} vs. #6 ${conferenceTeams[5]._teamName}`);
-    const lowerSeedMatch = getRandomWinnerWithScore(
-      conferenceTeams[2],
-      conferenceTeams[5]
-    );
+  function simConferencePlayoff(conferenceName, conferenceTeams) {
+    let jsx = [];
+    jsx.push(<h2>=== {conferenceName} Conference Playoffs ===</h2>);
+
+    // First Round Matches
+    // #3 vs #6
+    jsx.push(<h3>#3 {conferenceTeams[2]._teamName} vs. #6 {conferenceTeams[5]._teamName}</h3>);
+    const lowerSeedMatch = getRandomWinnerWithScore(conferenceTeams[2], conferenceTeams[5]);
     const lowerSeed = lowerSeedMatch.winner === conferenceTeams[2] ? 3 : 6;
-    console.log(`Winner: #${lowerSeed} ${lowerSeedMatch.winner._teamName}`);
-    console.log(`Final Score:`, lowerSeedMatch.finalScore, "\n");
 
-    console.log(`#4 ${conferenceTeams[3]._teamName} vs. #5 ${conferenceTeams[4]._teamName}`);
-    const higherSeedMatch = getRandomWinnerWithScore(
-      conferenceTeams[3],
-      conferenceTeams[4]
-    );
+    jsx.push(<p>Winner: #{lowerSeed} {lowerSeedMatch.winner._teamName}</p>);
+    jsx.push(<p>Final Score: {lowerSeedMatch.winner._teamName}: {lowerSeedMatch.finalScore.winner}, {lowerSeedMatch.loser._teamName}: {lowerSeedMatch.finalScore.loser}</p>);
+
+    // #4 vs #5
+    jsx.push(<h3>#4 {conferenceTeams[3]._teamName} vs. #5 {conferenceTeams[4]._teamName}</h3>);
+    const higherSeedMatch = getRandomWinnerWithScore(conferenceTeams[3], conferenceTeams[4]);
     const higherSeed = higherSeedMatch.winner === conferenceTeams[3] ? 4 : 5;
-    console.log(`Winner: #${higherSeed} ${higherSeedMatch.winner._teamName}`);
-    console.log(`Final Score:`, higherSeedMatch.finalScore, "\n");
+
+    jsx.push(<p>Winner: #{higherSeed} {higherSeedMatch.winner._teamName}</p>);
+    jsx.push(<p>Final Score: {higherSeedMatch.winner._teamName}: {higherSeedMatch.finalScore.winner}, {higherSeedMatch.loser._teamName}: {higherSeedMatch.finalScore.loser}</p>);
 
     // Second Round (Top seeds vs. First Round winners)
-    console.log(`#1 ${conferenceTeams[0]._teamName} vs. #${higherSeed} ${higherSeedMatch.winner._teamName}`);
+    jsx.push(<h3>#1 {conferenceTeams[0]._teamName} vs.#{higherSeed} {higherSeedMatch.winner._teamName}</h3>);
     const firstSeedMatch = getRandomWinnerWithScore(
       conferenceTeams[0],
       higherSeedMatch.winner
     );
     const firstSeedFinalSeed = firstSeedMatch.winner === conferenceTeams[0] ? 1 : higherSeed;
-    console.log(`Winner: #${firstSeedFinalSeed} ${firstSeedMatch.winner._teamName}`);
-    console.log(`Final Score:`, firstSeedMatch.finalScore, "\n");
 
-    console.log(`#2 ${conferenceTeams[1]._teamName} vs. #${lowerSeed} ${lowerSeedMatch.winner._teamName}`);
+    jsx.push(<p>Winner: #{firstSeedFinalSeed} {firstSeedMatch.winner._teamName}</p>);
+    jsx.push(<p>Final Score: {firstSeedMatch.winner._teamName}: {firstSeedMatch.finalScore.winner}, {firstSeedMatch.loser._teamName}: {firstSeedMatch.finalScore.loser}</p>);
+
+
+    jsx.push(<h3>#2 {conferenceTeams[1]._teamName} vs.#{lowerSeed} {lowerSeedMatch.winner._teamName}</h3>);
     const secondSeedMatch = getRandomWinnerWithScore(
       conferenceTeams[1],
       lowerSeedMatch.winner
     );
     const secondSeedFinalSeed = secondSeedMatch.winner === conferenceTeams[1] ? 2 : lowerSeed;
-    console.log(`Winner: #${secondSeedFinalSeed} ${secondSeedMatch.winner._teamName}`);
-    console.log(`Final Score:`, secondSeedMatch.finalScore, "\n");
+    jsx.push(<p>Winner: #{secondSeedFinalSeed} {secondSeedMatch.winner._teamName}</p>);
+    jsx.push(<p>Final Score: {secondSeedMatch.winner._teamName}: {secondSeedMatch.finalScore.winner}, {secondSeedMatch.loser._teamName}: {secondSeedMatch.finalScore.loser}</p>);
 
-    // Conference Final
-    console.log(`\n=== ${conferenceName} Conference Final ===`);
-    console.log(
-      `#${firstSeedFinalSeed} ${firstSeedMatch.winner._teamName} vs. #${secondSeedFinalSeed} ${secondSeedMatch.winner._teamName}`
-    );
+    // Conference Final Match
+    jsx.push(<h3>=== {conferenceName} Conference Final ===</h3>);
+    jsx.push(<h3>#{firstSeedFinalSeed} {firstSeedMatch.winner._teamName} vs.#{secondSeedFinalSeed} {secondSeedMatch.winner._teamName}</h3>);
     const conferenceFinalMatch = getRandomWinnerWithScore(
       firstSeedMatch.winner,
       secondSeedMatch.winner
     );
-    const conferenceChampionSeed =
-      conferenceFinalMatch.winner === firstSeedMatch.winner ? firstSeedFinalSeed : secondSeedFinalSeed;
-    console.log(`Winner: #${conferenceChampionSeed} ${conferenceFinalMatch.winner._teamName}`);
-    console.log(`Final Score:`, conferenceFinalMatch.finalScore, "\n");
+    const conferenceChampionSeed = conferenceFinalMatch.winner === firstSeedMatch.winner ? firstSeedFinalSeed : secondSeedFinalSeed;
 
+    jsx.push(<p>Winner: #{conferenceChampionSeed} {conferenceFinalMatch.winner._teamName}</p>);
+    jsx.push(<p>Final Score: {conferenceFinalMatch.winner._teamName}: {conferenceFinalMatch.finalScore.winner}, {conferenceFinalMatch.loser._teamName}: {conferenceFinalMatch.finalScore.loser}</p>);
+
+    returnjsx.push(jsx);
     return { team: conferenceFinalMatch.winner, seed: conferenceChampionSeed };
   }
 
   // Simulate playoffs for both conferences
-  const beastChampion = simulateConferencePlayoff("Beast", playoffs.Beast);
-  const strongChampion = simulateConferencePlayoff("Strong", playoffs.Strong);
+  const beastChampion = simConferencePlayoff("Beast", playoffs.Beast);
+  const strongChampion = simConferencePlayoff("Strong", playoffs.Strong);
+  
+  // Simulate League Finals
+  returnjsx.push(<h2>=== League Championship ===</h2>);
+  returnjsx.push(<h3>#{beastChampion.seed} {beastChampion.team._teamName} vs. #{strongChampion.seed} {strongChampion.team._teamName}</h3>);
 
-  // League Championship
-  console.log("\n=== League Championship ===");
-  console.log(
-    `#${beastChampion.seed} ${beastChampion.team._teamName} vs. #${strongChampion.seed} ${strongChampion.team._teamName}`
-  );
-  const leagueFinalMatch = getRandomWinnerWithScore(beastChampion.team, strongChampion.team);
-  console.log(`Winner: ${leagueFinalMatch.winner._teamName}`);
-  console.log(`Final Score:`, leagueFinalMatch.finalScore, "\n");
+  const championshipMatch = getRandomWinnerWithScore(beastChampion.team, strongChampion.team);
+
+  returnjsx.push(<p>Winner: {championshipMatch.winner._teamName}</p>);
+  returnjsx.push(<p>Final Score: {championshipMatch.winner._teamName}: {championshipMatch.finalScore.winner}, {championshipMatch.loser._teamName}: {championshipMatch.finalScore.loser}</p>);
+
+  return returnjsx;
 }
+
+
+// ***********************************************
+//
+//    Playoff Probability
+//
+// ***********************************************
+
+export function calculateWinProbability(team1, team2) {
+  const totalRating = team1.teamRating + team2.teamRating;
+  return team1.teamRating / totalRating;
+}
+
+export function getRemainingGames(allGames, currentWeek) {
+  // Flatten the array from currentWeek onward
+  const remainingGames = allGames
+    .slice(currentWeek)
+    .flat();
+
+  return remainingGames;
+}
+
+export function calculatePlayoffProbabilities(allGames, currentWeek, league) {
+  const remainingGames = getRemainingGames(allGames, currentWeek);
+
+
+}
+
 

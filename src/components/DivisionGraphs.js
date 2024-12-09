@@ -33,15 +33,6 @@ function DivisionGraphs({ recordsHistory }) {
         .append('g')
         .attr('transform', `translate(${margin.left},${margin.top})`);
 
-      const maxWins = Math.max(
-        ...recordsHistory.flatMap(week =>
-          division.teams.map(team => {
-            const teamInfo = week.find(record => record.teamName === team._teamName);
-            return teamInfo ? teamInfo._record.wins : 0;
-          })
-        )
-      );
-
       const xScale = d3.scaleLinear().domain([0, recordsHistory.length - 1]).range([0, width]);
       const yScale = d3.scaleLinear().domain([0, recordsHistory.length - 1])
         .range([height, 0]);
