@@ -1,0 +1,35 @@
+
+#teams-home-wrapper {
+  position: absolute;
+  top: 10%;
+}
+
+.teams-conference {
+  display: flex;
+  flex-direction: row;
+}
+
+.teams-conference-title {
+  display: flex;
+  justify-content: center;
+}
+
+.teams-division {
+  display: flex;
+  flex-direction: column;
+}
+
+.teams-team-element {
+  border-radius: 6px;
+  color: white;
+  height: 50px;
+  width: 180px;
+  margin: 5px;
+  padding: 5px;
+  padding-left: 20px;
+  margin-bottom: 8px;
+  display: flex;
+  flex-direction: row;
+  font-family: 'SF Pro';
+}
+

@@ -1,23 +1,31 @@
-
 #simulate-wrapper {
   position: relative;
   top: 100px;
 }
 
+/* Styling for division standings */
 .standings-wrapper {
   display: flex;
   flex-direction: column;
   font-size: 13px;
 }
-.division-wrapper {
+
+/* align conferences */
+.conference-standings-wrapper {
   display: flex;
   flex-direction: row;
 }
+
+.standings-division-wrapper {
+  display: flex;
+  flex-direction: column;
+}
+
 .division-team-element {
   border-radius: 6px;
   color: white;
-  height: 70px;
-  width: auto;
+  height: 55px;
+  width: 240px;
   margin: 5px;
   padding: 5px;
   padding-left: 20px;
@@ -26,22 +34,25 @@
   flex-direction: row;
   font-family: 'SF Pro';
 }
+
 .division-team-name {
   font-size: 18px;
   font-family: "SF Pro";
 }
+
 .division-team-record {
   font-size: 20px;
   margin-left: auto;
   margin-bottom: 0px;
 }
 
-/* Stying for playoff picture */
+/* Styling for playoff picture */
 #playoff-picture-title {
   text-align: center;
   font-size: 24px;
   margin: 14px;
 }
+
 .playoff-wrap {
   display: flex;
   flex-direction: row;
@@ -52,10 +63,12 @@
   border-radius: 18px;
   background: white;
 }
+
 .playoff-conference-wrapper {
   width: 50%;
   padding: 10px;
 }
+
 .playoff-conference-name {
   font-size: 34px;
   margin-top: 8px;
@@ -63,6 +76,7 @@
   margin-left: 1%;
   font-family: 'SF Pro';
 }
+
 .playoff-team-element {
   border-radius: 6px;
   color: white;
@@ -75,6 +89,7 @@
   display: flex;
   flex-direction: row;
 }
+
 .playoff-team-rank {
   position: relative;
   bottom: 10%;
@@ -82,6 +97,7 @@
   font-weight: bold;
   font-family: 'SF Pro';
 }
+
 .playoff-team-name {
   position: relative;
   left: 3%;
@@ -89,6 +105,7 @@
   font-size: 28px;
   font-family: 'SF Pro';
 }
+
 .playoff-team-record-info {
   position: relative;
   top: 56%;
@@ -98,22 +115,13 @@
   margin-left: auto;
   margin-bottom: 0px;
 }
+
 .playoff-team-record {
   font-size: 20px;
   margin-left: auto;
   margin-bottom: 0px;
 }
+
 .playoff-team-division {
   font-size: 10px;
-}
-
-/* Styling for Playoff Bracket */
-.sc-dcJsrY.dWYBbN {
-  background: white;
-}
-.sc-gsFSXq.eeHONM {
-  background: pink;
-}
-.sc-iGgWBj.gkXCXi {
-  color: #1f1f1f;
 }

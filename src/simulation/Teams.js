@@ -1,5 +1,5 @@
-export default class Team {
-  constructor(teamId, teamLocation, teamName, primaryColor, secondaryColor, teamRating, record) {
+export class Team {
+  constructor(teamId, teamLocation, teamName, primaryColor, secondaryColor, teamRating, record, playoffProbability) {
     this._teamId = teamId; 
     this._teamLocation = teamLocation;
     this._teamName = teamName;
@@ -7,6 +7,7 @@ export default class Team {
     this._secondaryColor = secondaryColor;
     this._teamRating = teamRating;
     this._record = { wins: 0, losses: 0 };
+    this._playoffProbability = 1;
   }
 
   // team getter functions
@@ -17,9 +18,11 @@ export default class Team {
   get secondaryColor() { return this._secondaryColor; }
   get teamRating() { return this._teamRating; }
   get record() { return this._record; }
+  get playoffProbability() { return this.playoffProbability; }
 
   // team setter functions
   set record(value) { this._record = value }
+  set playoffProbability(value) { this._playoffProbability = value }
 }
 
 // Beast: North Division:
@@ -66,9 +69,9 @@ export const colonials = new Team(28, "Charlotte", "Colonials", "#0013bf", "#bf0
 
 // Strong: West Division:
 export const stars = new Team(29, "Los Angeles", "Stars", "#04b4c4", "121212", 30);
-export const ducks = new Team(30, "San Diego", "Ducks", "#e87909", "#085c8c", 125);
-export const quakes = new Team(31, "San Francisco", "Quakes", "#1a1b47", "#bfbf62", 30);
-export const slisers = new Team(32, "San Jose", "Slisers", "#483fa1", "#49069c", 30);
+export const ducks = new Team(30, "San Diego", "Ducks", "#e87909", "#085c8c", 94);
+export const quakes = new Team(31, "San Francisco", "Quakes", "#1a1b47", "#bfbf62", 88);
+export const slisers = new Team(32, "San Jose", "Slisers", "#483fa1", "#49069c", 74);
 
 export const teams_list = [saints, giants, indies, knights, 
   heat, devils, red_sharks, tornadoes, 

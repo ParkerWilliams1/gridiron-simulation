@@ -1,0 +1,44 @@
+.playoff-match-element-wrapper {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.playoff-team-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background-color: var(--team1-color); /* This will apply the color for team 1 */
+  padding: 10px;
+  border-radius: 5px;
+  width: 150px;
+}
+
+.playoff-team-container:nth-child(2) {
+  background-color: var(--team2-color); /* This will apply the color for team 2 */
+}
+
+.team-details {
+  text-align: center;
+}
+
+.team-name {
+  font-size: 1.2rem;
+  font-weight: bold;
+}
+
+.record {
+  font-size: 1rem;
+  color: gray;
+}
+
+.round {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.final .playoff-match-element-wrapper {
+  font-size: 1.5rem;
+  font-weight: bold;
+}

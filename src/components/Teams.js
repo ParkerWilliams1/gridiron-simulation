@@ -1,20 +1,23 @@
 import * as TeamData from '../simulation/Teams';
+import '../styles/teams.css';
 
 function Home() {
   let teams = getAllTeamsNames();
   let league = TeamData.league;
 
   return (
-    <div id="home-wrapper">
+    <div id="teams-home-wrapper">
      {Object.entries(league).map(([conference, divisions]) => (
-        <div key={conference} className="conference">
-          <h2>{conference} Conference</h2>
+        <div key={conference} className="teams-conference">
+          <h2 className="teams-conference-title">{conference} Conference</h2>
           {Object.entries(divisions).map(([division, teams]) => (
-            <div key={division} className="division">
+            <div key={division} className="teams-division">
               <h3>{division} Division</h3>
               <ul>
                 {teams.map((team, index) => (
-                  <li key={index}>{team.teamLocation} {team.teamName}</li>
+                  <li className="teams-team-element" 
+                  style={{ backgroundColor: team.primaryColor }}
+                  key={index}>{team.teamLocation} {team.teamName}</li>
                 ))}
               </ul>
             </div>

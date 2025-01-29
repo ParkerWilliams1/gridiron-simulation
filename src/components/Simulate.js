@@ -15,23 +15,31 @@ function Simulate() {
   const [recordsHistory, setRecordsHistory] = useState([]);
   const [playoffTeams, setPlayoffTeams] = useState([]);
 
+  // Function which initializes season
   function returnSeason() {
     const tempGames = simFunctions.initializeSeason();
     const balancedSeason = simFunctions.balanceSeason(tempGames);
     
-    // Set the teams from the teams_list
     setTeams(Teams.teams_list);
     setAllGames(balancedSeason);
   }
 
-  function resetSeason() {
+  // Function which resets season to run new one (TODO: Currently crashes on run)
+  function resetSeason(callback) {
     setStandings(null);
+    setTeams([]); // Clear teams completely, not just using Teams.teams_list
     setAllGames([]);
-    setPlayoffRankings([]);
+    setPlayoffRankings(null);
     setWeek(-1);
     setRecordsHistory([]);
+
+    // Delay returnSeason to give React time to finish resetting state
+    if (callback) {
+      setTimeout(callback, 0); // Ensures state has time to update
+    }
   }
 
+  // Function to simulate individual week matches and calculate playoff's if week 15  
   function simWeek() {
     if (week > 14) {
       let playoffTeamsList = simFunctions.determinePlayoffBracket(Teams.league);
@@ -42,11 +50,9 @@ function Simulate() {
       /* let playoff = simFunctions.determinePlayoffBracket(Teams.league);
       let playoffJSX = simFunctions.simPlayoffMatches(playoff);
       setPlayoffRankings(playoffJSX);
-      return;*/
+      return;
+      */
     }
-
-    //const probabilities = simFunctions.calculatePlayoffProbabilities(allGames, week, Teams.league);
-    //console.log("Playoff Probabilities:", probabilities);
     
     simFunctions.simulateSingleWeek(allGames, week);
     setTeams([...teams]);
@@ -55,13 +61,13 @@ function Simulate() {
     const teamsClone = JSON.parse(JSON.stringify(teams));
     setRecordsHistory(prevHistory => [...prevHistory, teamsClone]);
 
+    let playoffProbs = simFunctions.calculatePlayoffProbabilities(allGames, week, Teams.league)
+    console.log(playoffProbs); 
+
     setWeek(week + 1);
   }
 
-  function logAllRecords() {
-    console.log(recordsHistory);
-  }
-
+  /* Use Effects */
   useEffect(() => {
     if (teams.length > 0) {
       // Update standings whenever teams change
@@ -79,13 +85,13 @@ function Simulate() {
     }
   }, [allGames, teams]);
 
+  /* Render elements */
   return (
     <div id="simulate-wrapper">
       <div className="sim-buttons-wrapper">
         <button onClick={returnSeason}>Setup Season</button>
         <button onClick={simWeek}>Simulate Week</button>
-        <button onClick={logAllRecords}>Log Records</button>
-        <button onClick={resetSeason}>Reset Season</button>
+        <button onClick={() => resetSeason(returnSeason)}>Reset and Setup Season</button>
       </div>
       <div className="standings-wrapper">
         <div className="standings-results">
@@ -94,15 +100,13 @@ function Simulate() {
         <div className="playoff-results">
           <h1 id="playoff-picture-title">Playoff Picture</h1>
           {playoffRankings}
-
-          {/* Pass the playoff teams to the Bracket component when week > 14 */}
         </div>
 
         {week > 14 && playoffTeams && playoffTeams.length > 0 && (
           <BracketComponent teams={playoffTeams} />
         )}
 
-        {/* <DivisionGraphs recordsHistory={recordsHistory} /> */}
+        { <DivisionGraphs recordsHistory={recordsHistory} /> }
       </div>
     </div>
   );

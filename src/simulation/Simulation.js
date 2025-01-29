@@ -1,4 +1,4 @@
-import { league } from './Teams.js';
+import { Team, league } from './Teams.js';
 import React from 'react';
 
 export const allGames = [];
@@ -255,13 +255,14 @@ export function printDivisionStandings(league) {
   for (const conferenceName in league) {
     let conferenceContent = [];
 
-    conferenceContent.push(
-      <h3 key={`conference-${conferenceName}`}>Division Standings for Conference: {conferenceName}</h3>
-    );
-
+    /*conferenceContent.push(
+      <h1 className="division-conference-title" key={`conference-${conferenceName}`}>Division Standings for Conference: {conferenceName}</h1>
+    );*/
+    
     // Loop through each division in the conference
     for (const divisionName in league[conferenceName]) {
       const division = league[conferenceName][divisionName];
+      let divisionContent = [];
 
       // Ensure division is an array (if it's an object, convert it)
       const teamsArray = Array.isArray(division) ? division : Object.values(division);
@@ -269,12 +270,12 @@ export function printDivisionStandings(league) {
       const sortedTeams = teamsArray.sort((a, b) => b.record.wins - a.record.wins);
 
       // Create a section for the division standings
-      conferenceContent.push(
+      divisionContent.push(
         <h4 key={`division-${conferenceName}-${divisionName}`}>Division: {divisionName}</h4>
       );
 
       sortedTeams.forEach(team => {
-        conferenceContent.push(
+        divisionContent.push(
           <div className="division-team-element" 
           style={{
             backgroundColor: team.primaryColor
@@ -284,6 +285,8 @@ export function printDivisionStandings(league) {
           </div>
         );
       });
+
+      conferenceContent.push(<div className="standings-division-wrapper">{divisionContent}</div>);
    }
 
 
@@ -294,7 +297,7 @@ export function printDivisionStandings(league) {
     );
   }
 
-  return <div className="division-wrapper">{standingsJSX}</div>;
+  return <div>{standingsJSX}</div>;
 }
 
 
@@ -421,17 +424,11 @@ export function simPlayoffMatches(playoffs) {
   return returnjsx;
 }
 
-
 // ***********************************************
 //
 //    Playoff Probability
 //
 // ***********************************************
-
-export function calculateWinProbability(team1, team2) {
-  const totalRating = team1.teamRating + team2.teamRating;
-  return team1.teamRating / totalRating;
-}
 
 export function getRemainingGames(allGames, currentWeek) {
   // Flatten the array from currentWeek onward
@@ -444,8 +441,63 @@ export function getRemainingGames(allGames, currentWeek) {
 
 export function calculatePlayoffProbabilities(allGames, currentWeek, league) {
   const remainingGames = getRemainingGames(allGames, currentWeek);
+  let playoffAppearances = new Array(31).fill(0);
 
+  for (let i = 0; i < 10; i++) {
+    // Simulate the season using the cloned league
+    let playoffOutcome = simulateEntireSeason(remainingGames, league);
 
+    for (let conference in playoffOutcome) {
+      for (let j = 0; j < 6; j++) {
+        let currTeamId = playoffOutcome[conference][j].teamId;
+        playoffAppearances[currTeamId] += 1;
+      }
+    }
+  }
+
+  return playoffAppearances;
 }
 
+export function simulateEntireSeason(games, league) {
+  // Create a deep clone of the league to avoid mutating the original
+  // TODO: Not properly cloning the league
+  const clonedLeague = deepCloneLeague(league);
 
+  for (let k = 0; k < games.length; k++) {
+    const homeTeam = games[k][0];
+    const awayTeam = games[k][1];
+    const winner = getRandomWinner(homeTeam, awayTeam);
+    const loser = winner === homeTeam ? awayTeam : homeTeam;
+
+    // Ensure we are modifying the records on the cloned teams, not the originals
+    const winnerRecord = winner.record;
+    const loserRecord = loser.record;
+
+    winnerRecord.wins++;
+    loserRecord.losses++;
+
+    // Since we are modifying the cloned teams' records, no need to assign back to winner.record and loser.record
+  }
+
+  // After the simulation, return the result of the playoff determination on the cloned league
+  let playoffRes = determinePlayoffBracket(clonedLeague);
+  console.log(playoffRes);
+
+  return playoffRes;
+}
+
+function deepCloneLeague(league) {
+  const clonedLeague = JSON.parse(JSON.stringify(league));
+
+  console.log("Here is the league", clonedLeague);
+  for (let conference in clonedLeague) {
+    for (let division in conference) {
+      console.log(conference, division);
+      for (let team in division) {
+        console.log(team);
+      }
+    }
+  }
+
+  return clonedLeague;
+}
